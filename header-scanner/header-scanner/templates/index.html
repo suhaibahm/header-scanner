@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Netscape - HeaderCheck v1.0</title>
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#1B7F63;
+    background-image:repeating-linear-gradient(45deg, rgba(255,255,255,0.025) 0 2px, transparent 2px 40px);
+    font-family:Verdana, Geneva, Arial, sans-serif;
+    color:#000;
+    min-height:100vh;
+    padding:22px 12px 60px;
+  }
+  a{color:#0000EE;}
+  a:visited{color:#551A8B;}
+
+  .browserwin{max-width:760px; margin:0 auto; background:#C0C0C0; border:2px solid #000; box-shadow:4px 4px 0 rgba(0,0,0,0.4);}
+
+  .titlebar{
+    background:linear-gradient(180deg,#0A3D91,#1860C9 50%,#0A3D91);
+    color:#fff; font-size:12px; font-weight:bold; padding:4px 6px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .titlebar .tleft{display:flex; align-items:center; gap:6px;}
+  .titlebar .n{width:16px;height:16px;background:#fff;border-radius:2px;color:#0A3D91;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;}
+  .titlebar .winbtns span{display:inline-block; width:14px;height:13px; background:#C0C0C0; border:1px outset #fff; margin-left:3px; text-align:center; font-size:9px; line-height:12px;}
+
+  .menubar{background:#C0C0C0; border-bottom:1px solid #808080; padding:2px 6px; font-size:11px; display:flex; gap:14px;}
+  .menubar span:hover{background:#000080; color:#fff;}
+
+  .toolbar{background:#C0C0C0; border-bottom:1px solid #808080; padding:5px 6px; display:flex; gap:4px; flex-wrap:wrap;}
+  .tbtn{background:#C0C0C0; border:1px outset #fff; padding:3px 9px; font-size:10px; text-align:center; min-width:48px;}
+  .tbtn .ic{font-size:14px; display:block;}
+  .tbtn.disabled{color:#888;}
+
+  .locationbar{background:#C0C0C0; padding:5px 6px; display:flex; align-items:center; gap:6px; border-bottom:2px solid #808080;}
+  .locationbar label{font-size:11px; font-weight:bold;}
+  .locationbar .locfield{flex:1; background:#fff; border:1px inset #808080; padding:3px 6px; font-size:12px;}
+
+  .content{background:#fff; padding:0;}
+  .pagepad{padding:16px 20px 24px;}
+
+  marquee{background:#FFFF66; border-top:1px solid #000; border-bottom:1px solid #000; font-size:13px; font-weight:bold; color:#CC0000; padding:4px 0;}
+
+  .bannerhead{background:linear-gradient(180deg,#3399FF,#0055CC); color:#fff; padding:10px 16px; margin:14px 0; border:2px solid #000;}
+  .bannerhead h1{font-family:'Times New Roman',serif; font-size:24px; margin:0; text-shadow:1px 1px 0 #000;}
+  .bannerhead .sub{font-size:11px; margin-top:3px; font-style:italic;}
+
+  hr.rainbow{border:none; height:4px; margin:14px 0; background:linear-gradient(90deg,red,orange,yellow,green,blue,indigo,violet);}
+
+  h2.section{font-family:'Times New Roman',serif; font-size:18px; color:#0000AA; border-bottom:2px solid #0000AA; padding-bottom:3px; margin-top:0;}
+
+  .formbox{background:#ECECEC; border:1px solid #999; padding:14px 16px; margin:16px 0;}
+  .formbox table{width:100%; font-size:12px;}
+  .formbox td{padding:5px 4px; vertical-align:middle;}
+  .formbox input[type=text]{width:100%; padding:6px 7px; font-family:Verdana,sans-serif; font-size:13px; border:1px inset #808080;}
+  .winbutton{background:#C0C0C0; border:2px outset #fff; padding:8px 22px; font-size:13px; font-weight:bold; cursor:pointer;}
+  .winbutton:active{border:2px inset #fff;}
+  .winbutton:disabled{color:#888; cursor:default;}
+
+  .gradebox{
+    text-align:center; padding:18px; margin:16px 0; border:2px solid #000; display:none;
+  }
+  .gradebox.show{display:block;}
+  .gradebox .letter{font-family:'Times New Roman',serif; font-size:64px; font-weight:bold; line-height:1;}
+  .gradebox.grade-A{background:#CCFFCC;}
+  .gradebox.grade-B{background:#E0FFCC;}
+  .gradebox.grade-C{background:#FFF3C2;}
+  .gradebox.grade-D{background:#FFDDAA;}
+  .gradebox.grade-F{background:#FFC2C2;}
+
+  table.results{width:100%; border-collapse:collapse; font-size:12px; margin-top:10px; display:none;}
+  table.results.show{display:table;}
+  table.results th{background:#000080; color:#fff; padding:5px 8px; text-align:left;}
+  table.results td{border:1px solid #999; padding:6px 8px; vertical-align:top;}
+  .yes{color:green; font-weight:bold;}
+  .no{color:#CC0000; font-weight:bold;}
+  .why{font-size:11px; color:#444;}
+  .fix{font-size:11px; color:#006600; font-weight:bold;}
+  .fix::before{content:"fix: ";}
+
+  .leakbox, .cookiebox{display:none; margin-top:14px; font-size:12px; background:#FFF8E0; border:1px solid #CC9900; padding:10px 12px;}
+  .leakbox.show, .cookiebox.show{display:block;}
+
+  .disclaimer{background:#FFEEEE; border:2px dashed #CC0000; padding:8px 10px; margin-top:12px; font-size:11px; color:#660000;}
+  .errbox{display:none; background:#FFCCCC; border:2px solid #CC0000; padding:10px 14px; margin-top:14px; font-size:12px; font-weight:bold;}
+  .errbox.show{display:block;}
+
+  .statusbar{background:#C0C0C0; border-top:2px solid #808080; padding:5px 10px; font-size:11px; display:flex; justify-content:space-between;}
+  .counter{background:#000; color:#33FF33; font-family:'Courier New',monospace; font-weight:bold; font-size:13px; padding:2px 6px; letter-spacing:2px; border:1px inset #444;}
+  .footer-outside{max-width:760px; margin:14px auto 0; text-align:center; font-size:10px; color:#DFF5EC;}
+
+  /* nyan cat easter egg */
+  .nyanstrip{
+    position:relative; height:34px; overflow:hidden; background:#0b0b1a;
+    border-top:1px solid #000; border-bottom:1px solid #000;
+  }
+  .nyanstrip .stars{
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(1px 1px at 10% 30%, #fff, transparent),
+      radial-gradient(1px 1px at 30% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 50% 20%, #fff, transparent),
+      radial-gradient(1px 1px at 70% 60%, #fff, transparent),
+      radial-gradient(1px 1px at 85% 35%, #fff, transparent),
+      radial-gradient(1px 1px at 95% 80%, #fff, transparent);
+    animation:twinkle 1.4s steps(2) infinite;
+  }
+  @keyframes twinkle{50%{opacity:0.4;}}
+  .nyanrig{position:absolute; top:6px; left:-160px; animation:nyanfly 7s linear infinite; white-space:nowrap;}
+  .nyantrail{
+    display:inline-block; vertical-align:middle; width:120px; height:18px;
+    background:repeating-linear-gradient(180deg,#ff4040 0 3px,#ff9b40 3px 6px,#ffe640 6px 9px,#40ff5e 9px 12px,#40b6ff 12px 15px,#9b40ff 15px 18px);
+    border-radius:3px 0 0 3px;
+  }
+  .nyancat{display:inline-block; vertical-align:middle; font-size:20px; transform:scaleX(-1); margin-left:-4px;}
+  @keyframes nyanfly{
+    0%{left:-160px;}
+    100%{left:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="browserwin">
+
+  <div class="titlebar">
+    <div class="tleft"><span class="n">N</span> Netscape — HeaderCheck v1.0</div>
+    <div class="winbtns"><span>_</span><span>□</span><span>X</span></div>
+  </div>
+
+  <div class="menubar"><span>File</span><span>Edit</span><span>View</span><span>Go</span><span>Help</span></div>
+
+  <div class="toolbar">
+    <div class="tbtn disabled"><span class="ic">⏪</span>Back</div>
+    <div class="tbtn disabled"><span class="ic">⏩</span>Forward</div>
+    <div class="tbtn"><span class="ic">⟳</span>Reload</div>
+    <div class="tbtn"><span class="ic">🏠</span>Home</div>
+    <div class="tbtn"><span class="ic">🔒</span>Security</div>
+    <div class="tbtn disabled"><span class="ic">■</span>Stop</div>
+  </div>
+
+  <div class="locationbar">
+    <label>Location:</label>
+    <div class="locfield">http://headercheck.local/scan.cgi</div>
+  </div>
+
+  <div class="nyanstrip">
+    <div class="stars"></div>
+    <div class="nyanrig">
+      <span class="nyantrail"></span><span class="nyancat">🐱</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <marquee behavior="scroll" scrollamount="4">★ checks the security headers your site is (or isn't) sending back ★ free, no signup, runs locally ★</marquee>
+
+    <div class="pagepad">
+      <div class="bannerhead">
+        <h1>HeaderCheck</h1>
+        <div class="sub">a small tool that checks if your site sends the security headers it should</div>
+      </div>
+
+      <hr class="rainbow">
+
+      <h2 class="section">What's a security header anyway?</h2>
+      <p style="font-size:12.5px; line-height:1.7;">
+        Every time a browser loads your page, your server sends back a bunch of headers along
+        with the actual content. Some of those headers tell the browser to lock things down -
+        don't allow this site in an iframe, don't run inline scripts from random places, only
+        ever connect over HTTPS, that kind of thing. A lot of sites just... don't bother setting
+        them. This checks for the common ones and tells you what's missing and why it matters.
+      </p>
+
+      <h2 class="section">Check a site</h2>
+      <div class="formbox">
+        <form id="scanForm">
+          <table>
+            <tr>
+              <td style="width:80px;"><b>URL:</b></td>
+              <td><input type="text" id="urlInput" placeholder="example.com or https://example.com" required></td>
+              <td style="width:90px;"><button type="submit" class="winbutton" id="scanBtn">Check</button></td>
+            </tr>
+          </table>
+        </form>
+        <div class="disclaimer">
+          Only checks publicly available response headers - same thing your browser already
+          sees. Still, only run this against sites you own or are allowed to test.
+        </div>
+      </div>
+
+      <div class="errbox" id="errBox"></div>
+
+      <div class="gradebox" id="gradeBox">
+        <div class="letter" id="gradeLetter">-</div>
+        <div id="gradeSub" style="font-size:12px; margin-top:6px;"></div>
+      </div>
+
+      <table class="results" id="resultsTable">
+        <thead>
+          <tr><th>Header</th><th>Present?</th><th>Details</th></tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+
+      <div class="leakbox" id="leakBox"></div>
+      <div class="cookiebox" id="cookieBox"></div>
+
+      <hr class="rainbow">
+      <div class="statusbar">
+        <span>Document: Done</span>
+        <span>Visitors: <span class="counter" id="hitcounter">001204</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-outside">HeaderCheck · quick header audit tool · not a substitute for a proper security review</div>
+
+<script>
+document.getElementById('hitcounter').textContent = String(1204 + Math.floor(Math.random()*9)).padStart(6,'0');
+
+const form = document.getElementById('scanForm');
+const btn = document.getElementById('scanBtn');
+const errBox = document.getElementById('errBox');
+const gradeBox = document.getElementById('gradeBox');
+const resultsTable = document.getElementById('resultsTable');
+const leakBox = document.getElementById('leakBox');
+const cookieBox = document.getElementById('cookieBox');
+
+form.onsubmit = async function(e){
+  e.preventDefault();
+  const url = document.getElementById('urlInput').value.trim();
+  if(!url) return;
+
+  errBox.classList.remove('show');
+  gradeBox.classList.remove('show');
+  resultsTable.classList.remove('show');
+  leakBox.classList.remove('show');
+  cookieBox.classList.remove('show');
+
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  let res, data;
+  try{
+    res = await fetch('/scan', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({url: url})
+    });
+    data = await res.json();
+  } catch(err){
+    showError('Request failed: ' + err);
+    return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Check';
+
+  if(data.error){
+    showError(data.error);
+    return;
+  }
+
+  // grade box
+  gradeBox.className = 'gradebox show grade-' + data.grade;
+  document.getElementById('gradeLetter').textContent = data.grade;
+  document.getElementById('gradeSub').textContent =
+    data.found.length + ' of ' + (data.found.length + data.missing.length) + ' recommended headers present — status ' + data.status_code;
+
+  // results table
+  let rows = '';
+  for(const f of data.found){
+    rows += '<tr><td>' + f.name + '</td><td class="yes">YES</td><td style="font-size:11px;">' + escapeHtml(f.value) + '</td></tr>';
+  }
+  for(const m of data.missing){
+    rows += '<tr><td>' + m.name + '</td><td class="no">NO</td><td><div class="why">' + m.why + '</div><div class="fix">' + m.fix + '</div></td></tr>';
+  }
+  document.getElementById('resultsBody').innerHTML = rows;
+  resultsTable.classList.add('show');
+
+  // leaky headers
+  if(data.leaky_headers && data.leaky_headers.length){
+    leakBox.innerHTML = '<b>Heads up:</b> your server is telling everyone what software it runs:<br>' +
+      data.leaky_headers.map(h => '&bull; ' + h.name + ': ' + escapeHtml(h.value)).join('<br>');
+    leakBox.classList.add('show');
+  }
+
+  // cookies
+  if(data.cookie_issues && data.cookie_issues.length){
+    cookieBox.innerHTML = '<b>Cookie issues:</b><br>' +
+      data.cookie_issues.map(c => '&bull; ' + c.name + ' — missing: ' + c.problems.join(', ')).join('<br>');
+    cookieBox.classList.add('show');
+  }
+};
+
+function showError(msg){
+  errBox.textContent = '⚠ ' + msg;
+  errBox.classList.add('show');
+  btn.disabled = false;
+  btn.textContent = 'Check';
+}
+
+function escapeHtml(s){
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+</script>
+</body>
+</html>
